@@ -1,4 +1,4 @@
-# E5-CCISP
+# E5-CISSP
 BRUNEL Grégory Rendu
 
 
@@ -39,131 +39,66 @@ Voici la structure du projet:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- FILES CONFIGURATIONS -->
-## Configurations
-
-. Contenu du fichier mynginxconf.conf
-
-``` bash
-# Django Soft UI Dashboard
-upstream django-soft-ui {
-    server django-soft-ui:8000;
-}
-
-server {
-    listen 7010;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://django-soft-ui;
-        proxy_set_header Host $host:$server_port;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-
-# Flask Soft UI Design
-upstream flask-soft-ui {
-    server flask-soft-ui:5000;
-}
-
-server {
-    listen 7011;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://flask-soft-ui;
-        proxy_set_header Host $host:$server_port;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-
-# Ecommerce Flask Stripe
-upstream ecommerce-flask-stripe {
-    server ecommerce-flask-stripe:7000;
-}
-
-server {
-    listen 7012;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://ecommerce-flask-stripe;
-        proxy_set_header Host $host:$server_port;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-
-# Rocket Django
-upstream rocket-django {
-    server rocket-django:8001;
-}
-
-server {
-    listen 7013;
-    server_name localhost;
-
-    location / {
-        proxy_pass http://rocket-django;
-        proxy_set_header Host $host:$server_port;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-
-```
 
 . Contenu du docker-compose.yml
 
 ``` bash
-version: '3.8'
+ersion: '3.7'
 
 services:
   django-soft-ui:
-    build: ./apps/django-soft-ui-dashboard
-    ports:
-      - "8000:8000"
+    # build: ./django-soft-ui-dashboard
+    image: th0m8s/django-soft-ui-dashboard:prod
+    ports:     
+      - "5080:5005"
     networks:
       - app_network
 
   flask-soft-ui:
-    build: ./apps/flask-soft-ui-design
-    ports:
-      - "5000:5000"
+    # build: ./apps/flask-soft-ui-design
+    image: th0m8s/flask-soft-ui-dashboard:prod
+    ports: 
+      - "5083:5008"
     networks:
       - app_network
 
-  ecommerce-flask-stripe:
-    build: ./apps/ecommerce-flask-stripe
+  flask-material-dashboard:
+    # build: ./apps/ecommerce-flask-stripe
+    image: th0m8s/flask-material-dashboard:prod
     ports:
-      - "7000:7000"
+      - "5082:5007"
     networks:
       - app_network
 
-  rocket-django:
-    build: ./apps/rocket-django
-    ports:
-      - "8001:8001"
+  flask-atlantis-dark:
+    # build: ./apps/rocket-django
+    image: th0m8s/flask-atlantis-dark:prod
+    ports:      
+      - "5081:5006"
     networks:
       - app_network
 
   nginx:
-    image: nginx:latest
-    ports:
-      - "7010:7010"
-      - "7011:7011"
-      - "7012:7012"
-      - "7013:7013"
+    image: "nginx:mainline-alpine3.20-slim"
+    ports:      
+      - "5080:5005"
+      - "5081:5006"
+      - "5082:5007"
+      - "5083:5008"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+    networks:
+      - web_network
     depends_on:
       - django-soft-ui
       - flask-soft-ui
-      - ecommerce-flask-stripe
-      - rocket-django
-    networks:
-      - app_network
+      - flask-material-dashboard
+      - flask-atlantis-dark
 
 networks:
   app_network:
+    driver: bridge
+  web_network:
     driver: bridge
 
 ```
@@ -171,51 +106,39 @@ networks:
 <!-- GETTING STARTED -->
 ## Etape du build
 
-### Pour déployer les applications du répertoire "devoir":
+### Pour déployer les applications:
 
-1- Positionnez vous dans ce répertoire avec la commande suivante:
-
-``` bash
-cd devoir
-```
-
-2- Exécuter la commande suivante pour mettre en place votre iac:
+1- Exécuter la commande suivante pour mettre en place vos application:
 
 ``` bash
 docker compose up -d
 ```
 
-3- Après le build, tapez les commandes suivantes:
+2- Après le build, tapez les commandes suivantes:
 
 ``` bash
 docker images
-docker ps
-```
-
-. Screen présentant les images
-
-![alt text](screens/image.png)
-
-``` bash
 docker ps
 ```
 ou
 ``` bash
 docker ps -a
 ```
-. Screen présentant les conteneurs en cours d'exécution (a update)
+. Screen présentant les conteneurs en cours d'exécution
 
-![alt text](screens/dockerps.png)
+![alt text](screen/dockerps.png)
 
-Testez vos applications en local sur les ports suivants: ( a update) 
+Testez vos applications en local sur les ports suivants:
   <ul>
-    <li><a href="#http://localhost:7010">http://localhost:7010</a></li>
-    <li><a href="#http://localhost:7011">http://localhost:7011</a></li>
-    <li><a href="#http://localhost:7012">http://localhost:7012</a></li>
+    <li><a href="#http://localhost:5080">http://localhost:5080</a></li>
+    <li><a href="#http://localhost:5081">http://localhost:5081</a></li>
+    <li><a href="#http://localhost:5082">http://localhost:5082</a></li>
+    <li><a href="#http://localhost:5083">http://localhost:5083</a></li>
+
 
   </ul>
 
-4- Pushez vos images sur le docker hub
+3- Pushez vos images sur le docker hub
 
 . Connectez vous au docker hub:
 
@@ -240,14 +163,9 @@ docker tag nom_image:tag: your_username/nom_image:tag_name_for_hub
 docker push your_username/nom_image:tag_name_for_hub
 ```
 
+. Docker Hub repositories
 
-. Screen présentant les logs obtenus lors d'un push (a update)
-
-![alt text](screen/Dashard.png)
-
-. Docker Hub repositories (a update)
-
-![alt text](screens/hub.png)
+![alt text](screen/repository.jpg)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -281,12 +199,6 @@ Ecommerce Flask Stripe
 Simplifie l'intégration des paiements avec Stripe.
 Idéal pour les projets de commerce électronique.
 
-Rocket Django
-
-Robuste et bien structuré pour des projets évolutifs.
-Offre des fonctionnalités prédéfinies pour un développement rapide.
-Ces frameworks sont légers, simples à prendre en main et proposent des exemples pratiques pour accélérer le développement tout en assurant une qualité professionnelle.
-
 ## Diagramme Projet
 
-![alt text](screen/schema1.png)
+![alt text](screen/schema.png)
