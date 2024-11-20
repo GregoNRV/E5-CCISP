@@ -289,4 +289,4 @@ Ces frameworks sont légers, simples à prendre en main et proposent des exemple
 
 ## Diagramme Projet
 
-![alt text](screen/shema1.png)
+![alt text](screen/schema1.png)
